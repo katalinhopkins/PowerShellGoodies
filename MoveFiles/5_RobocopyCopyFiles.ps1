@@ -238,8 +238,6 @@ Function global:RobocopyCopyFiles
 
 	}#If($debugFlag) #> 
 
-
-	
 	
 	$SourceFolderNameArr = $Source.split("\")
 	$SourceFolderName = $SourceFolderNameArr[$SourceFolderNameArr.Count-1]

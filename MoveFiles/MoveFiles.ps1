@@ -192,7 +192,8 @@ $TableName = 'FilesTable'
 #$Source="\\DS224\MS-Surface-E6F1US5\kahopkin\OneDrive-Outlook\OneDrive"
 
 #$Source="\\DS224\MS-Surface-E6F1US5\Chief Architect"
-$Source="\\DS224\Documents\Personal"
+#$Source="\\DS224\Documents\Personal"
+$Source = "\\DS224\Downloads\Executables"
 
 
 #Destination = MAKE SURE THAT THE DESTINATION IS THE PARENT FOLDER WHERE THE FILES GET COPIED/MOVED!
@@ -203,8 +204,8 @@ $Source="\\DS224\Documents\Personal"
 #$Destination = "\\DS224"
 
 #$Destination = "\\DS224\Chief Architect"
-$Destination = "\\DS224\Documents"
-#$Destination = "\\DS224\Downloads"
+#$Destination = "\\DS224\Documents"
+$Destination = "\\DS224\Downloads"
 #$Destination = "\\DS224\Music"
 #$Destination = "\\DS224\Video"
 #$Destination = "\\DS224\Photo"

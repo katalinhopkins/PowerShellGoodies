@@ -344,9 +344,9 @@ If(-not $CopyOnlyFLag)
 
 #
 # Call Robocopy to copy/move folder and its contents!
-#exact folder exists as destination
-
-#
+# MOVE exact folder exists as destination
+<#
+#MOVE
 $psCommand =  "`RobocopyMoveFiles `` `n`t" + 
 		"-Source `"" + $Source + "`" `` `n`t" + 
 		"-Destination `"" + $DestinationFolder + "`"" 
@@ -355,7 +355,7 @@ Write-Host -ForegroundColor White $psCommand
 RobocopyMoveFiles -Source $Source -Destination $DestinationFolder -LogFile $LogFile
 #>
 
-#destination is the parent folder
+# MOVE destination is the parent folder
 <#
 $psCommand =  "`RobocopyMoveFiles `` `n`t" + 
 		"-Source `"" + $Source + "`" `` `n`t" + 
@@ -366,7 +366,8 @@ RobocopyMoveFiles -Source $Source -Destination $Destination -LogFile $LogFile
 #>
 
 
-<#
+<# 
+# COPY
 $psCommand =  "`RobocopyCopyFiles `` `n`t" + 
 		"-Source `"" + $Source + "`" `` `n`t" + 
 		"-Destination `"" + $DestinationFolder + "`"" 

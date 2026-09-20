@@ -79,7 +79,7 @@ $TableName = 'FilesTable'
 #$Source ="D:\Users\Katal\OneDrive\MS-Surface-E6F1US5\Videos"
 #$Source =""
 #$Source =""
-#$Source =""
+$Source ="D:\Users\Katal\Anastasia\iCloudDrive"
 #$Source ="C:\GitHub\PowerShellGoodies"
 
 <#
@@ -103,17 +103,26 @@ $Source="D:\Users\Katal\OneDrive\Videos"
 $Source="\\DS224\MS-Surface-E6F1US5\Documents"
 #>
 
-$Source = "\\DS224\Documents\Professional"
+#$Source = "\\DS224\Documents\Professional"
+#$Source="\\DS224\MS-Surface-E6F1US5\Personal\Pets"
 
 #$Destination = "D:\Users\Katal\OneDrive"
 #$Destination = "\\DS224\Documents"
+$Destination = "\\DS224\Anastasia"
 
 #$Destination = "\\DS224\MS-Surface-E6F1US5"
 #$Destination = ""
+#$Destination = ""
+#$Destination = ""
+#$Destination = ""
+#$Destination = ""
+#$Destination = ""
+#$Destination = ""
+#W:\Anastasia
 #$Source ="C:\Users\katal\source\repos\PowerShellGoodies"
 #$Destination = "C:\Users\katal\source\repos"
-$Destination = "D:\Users\Katal\OneDrive\Documents"
-
+#$Destination = "D:\Users\Katal\OneDrive\Documents"
+#$Destination = "D:\Users\Katal\OneDrive\Documents\MyPets"
 
 $ScriptLocation = Get-Location
 	$ScriptPath = $ScriptLocation.Path
@@ -277,19 +286,19 @@ RobocopyMoveFiles -Source $Source -Destination $Destination -LogFile $LogFile
 
 
 
-<#
+#
 $psCommand =  "`RobocopyCopyFiles `` `n`t" + 
 		"-Source `"" + $Source + "`" `` `n`t" + 
 		"-Destination `"" + $Destination + "`"" 
 
-Write-Host -ForegroundColor Cyan  "`n#[274]Calling:"
+Write-Host -ForegroundColor Cyan  "`n#[293]Calling:"
 Write-Host -ForegroundColor White $psCommand
-#RobocopyCopyFiles -Source $Source -Destination $Destination -LogFile $LogFile
+RobocopyCopyFiles -Source $Source -Destination $Destination -LogFile $LogFile
 #>
 
 
 
-#<#
+<#
 #exact folder exists as destination
 $psCommand =  "`RobocopyCopyFiles `` `n`t" + 
 		"-Source `"" + $Source + "`" `` `n`t" + 
