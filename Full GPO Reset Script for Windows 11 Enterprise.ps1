@@ -5,20 +5,22 @@
     - Resets Local Security Policy (secedit / defltbase.inf)
     - Clears cached domain GPOs (if present)
     - Removes registry-based policy keys (with ACL fix)
-    - Generates a gpresult report for verification
+    - Generates a gpresult report (overwrite-safe)
     - Deep debugging output for enterprise troubleshooting
 #>
 
-# region Elevation Check
+# region Elevation Check (Corrected + Debug)
 Write-Host "=== [START] Full GPO Reset – Debug + ACL Fix Edition ===" -ForegroundColor Cyan
 
 $startTime = Get-Date
 Write-Host "[DEBUG] Script start time: $startTime"
 
-if (-not ([Security.Principal.WindowsPrincipal] `
-    [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(`
-    [Security.Principal.WindowsBuiltInRole] "Administrator")) {
+Write-Host "[DEBUG] Checking elevation..." -ForegroundColor Cyan
 
+$principal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+$adminRole = [Security.Principal.WindowsBuiltInRole]::Administrator
+
+if (-not ($principal.IsInRole($adminRole))) {
     Write-Host "[ERROR] Script must run as Administrator." -ForegroundColor Red
     exit 1
 }
@@ -213,12 +215,25 @@ try {
 # endregion
 
 
-# region gpresult
+# region gpresult (Overwrite-Safe)
 Write-Host "`n=== [STEP 6] Generate gpresult Report ===" -ForegroundColor Cyan
 
+Write-Host "[DEBUG] Checking if gpresult file already exists: $gpResultPath"
+if (Test-Path $gpResultPath) {
+    Write-Host "[DEBUG] Existing gpresult file detected. Removing..." -ForegroundColor DarkYellow
+    try {
+        Remove-Item -Path $gpResultPath -Force -ErrorAction Stop
+        Write-Host "[SUCCESS] Old gpresult file removed." -ForegroundColor Green
+    } catch {
+        Write-Host "[ERROR] Failed to remove existing gpresult file." -ForegroundColor Red
+        Write-Host "[EXCEPTION] ${($_.Exception.Message)}"
+        Write-Host "[INFO] Proceeding with gpresult /f overwrite anyway." -ForegroundColor Yellow
+    }
+}
+
 try {
-    Write-Host "[ACTION] Generating gpresult report..." -ForegroundColor DarkYellow
-    gpresult /h $gpResultPath
+    Write-Host "[ACTION] Generating gpresult report (forced overwrite)..." -ForegroundColor DarkYellow
+    gpresult /h $gpResultPath /f
     Write-Host "[SUCCESS] gpresult saved to: $gpResultPath" -ForegroundColor Green
 } catch {
     Write-Host "[ERROR] gpresult failed." -ForegroundColor Red
