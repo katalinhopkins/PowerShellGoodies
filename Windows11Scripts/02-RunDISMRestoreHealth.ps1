@@ -11,9 +11,10 @@ fails with error 0x80073712
 
 When it finishes: REBOOT
 #>
-
+Write-Host (Get-Date -Format "yyyy-MM-dd HH:mm:ss")  -ForegroundColor Yellow
 DISM /Online /Cleanup-Image /RestoreHealth
 
 Write-Host "RestoreHealth is COMPLETE..."
+Write-Host (Get-Date -Format "yyyy-MM-dd HH:mm:ss")  -ForegroundColor Yellow
 Write-Host "REBOOTING NOW" -ForegroundColor Red
 Restart-Computer
