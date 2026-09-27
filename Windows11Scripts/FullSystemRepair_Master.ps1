@@ -129,6 +129,65 @@ function Show-FinalRuntimeSummary
 }#end function Show-FinalRuntimeSummary
 
 
+# ============================================================
+# DISM HEARTBEAT MONITOR
+# ============================================================
+
+function Start-DISMHeartbeat
+{
+    param(
+        [int]$IntervalSeconds = 30,
+        [int]$IdleThresholdSeconds = 300   # 5 minutes
+    )
+
+    Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Start" -Message "DISM heartbeat monitor activated."
+
+    $lastCpu = 0
+    $lastMem = 0
+    $lastHandles = 0
+    $lastChange = Get-Date
+
+    while ($true)
+    {
+        $proc = Get-Process -Name dism -ErrorAction SilentlyContinue
+
+        if (-not $proc)
+        {
+            Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Stop" -Message "DISM process ended. Heartbeat monitor stopping."
+            break
+        }
+
+        $cpu = $proc.CPU
+        $mem = $proc.WorkingSet64
+        $handles = $proc.Handles
+
+        Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Heartbeat" -Message "CPU: $cpu  WS(K): $([math]::Round($mem/1KB))  Handles: $handles"
+
+        # Detect idle state
+        if ($cpu -ne $lastCpu -or $mem -ne $lastMem -or $handles -ne $lastHandles)
+        {
+            # DISM is doing work
+            $lastChange = Get-Date
+        }
+        else
+        {
+            # DISM unchanged — check idle duration
+            $idleTime = (Get-Date) - $lastChange
+
+            if ($idleTime.TotalSeconds -ge $IdleThresholdSeconds)
+            {
+                Log -Level "WARN" -Category "DISMHeartbeat" -Operation "IdleWarning" -Message "DISM has been idle for $($idleTime.TotalMinutes.ToString('0.0')) minutes."
+            }
+        }
+
+        $lastCpu = $cpu
+        $lastMem = $mem
+        $lastHandles = $handles
+
+        Start-Sleep -Seconds $IntervalSeconds
+    }#end while block
+}#end function Start-DISMHeartbeat
+
 
 # ============================================================
 # Unified Execution Function
