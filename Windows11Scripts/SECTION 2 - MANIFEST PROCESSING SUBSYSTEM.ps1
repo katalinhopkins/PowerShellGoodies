@@ -19,6 +19,44 @@ function Apply-Manifest
 
     try
     {
+        $exitCode = Invoke-DISMWithDeadlockDetection `
+            -Arguments "/online /add-package /packagepath:`"$ManifestPath`" /quiet" `
+            -IdleThresholdSeconds 600
+
+        if ($exitCode -eq 0)
+        {
+            Log `
+                -Level "SUCCESS" `
+                -Category "ManifestProcessing" `
+                -Operation "ApplyManifest" `
+                -Message "Manifest applied successfully." `
+                -Path $ManifestPath
+        }#end if block
+        else
+        {
+            Log `
+                -Level "ERROR" `
+                -Category "ManifestProcessing" `
+                -Operation "ApplyManifest" `
+                -Message "DISM failed or deadlocked for manifest." `
+                -Path $ManifestPath `
+                -Code $exitCode
+        }#end else block
+    }#end try block
+    catch
+    {
+        Log `
+            -Level "EXCEPTION" `
+            -Category "ManifestProcessing" `
+            -Operation "ApplyManifest" `
+            -Message "Exception thrown while applying manifest." `
+            -Path $ManifestPath `
+            -ExceptionType $_.Exception.GetType().FullName
+    }#end catch block
+
+    <#
+    try
+    {
         Start-Process `
             -FilePath "dism.exe" `
             -ArgumentList "/online","/add-package","/packagepath:$ManifestPath","/quiet" `
@@ -45,7 +83,7 @@ function Apply-Manifest
 
         Write-Host $_ -ForegroundColor DarkRed
     }#end catch block
-
+    #>
 }#end function Apply-Manifest
 
 # ------------------------------------------------------------
