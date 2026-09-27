@@ -2,6 +2,8 @@
 # SECTION 2 — MANIFEST PROCESSING SUBSYSTEM
 # ============================================================
 
+Start-DISMHeartbeat -IntervalSeconds 30 -IdleThresholdSeconds 300
+
 function Apply-Manifest
 {
     param(
