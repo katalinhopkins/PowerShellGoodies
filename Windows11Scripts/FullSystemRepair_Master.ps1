@@ -12,6 +12,15 @@
 # All with your logging framework active.
 
 # ============================================================
+<#
+Master Script Structure
+# 1. Logging framework (SECTION 1 will use it)
+# 2. DISM heartbeat function  ← MUST BE HERE
+# 3. DISM deadlock detection  ← MUST BE HERE
+# 4. Import SECTION files
+# 5. Invoke-FullSystemRepair
+
+#>
 
 <#
  1. Run the master script
@@ -22,7 +31,145 @@
 
 # ============================================================
 
+#Change directory
 cd D:\GitHub\PowerShellGoodies\Windows11Scripts
+
+
+# ============================================================
+# DISM HEARTBEAT MONITOR
+# ============================================================
+
+function Start-DISMHeartbeat
+{
+    param(
+        [int]$IntervalSeconds = 30,
+        [int]$IdleThresholdSeconds = 300   # 5 minutes
+    )
+
+    Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Start" -Message "DISM heartbeat monitor activated."
+
+    $lastCpu = 0
+    $lastMem = 0
+    $lastHandles = 0
+    $lastChange = Get-Date
+
+    while ($true)
+    {
+        $proc = Get-Process -Name dism -ErrorAction SilentlyContinue
+
+        if (-not $proc)
+        {
+            Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Stop" -Message "DISM process ended. Heartbeat monitor stopping."
+            break
+        }
+
+        $cpu = $proc.CPU
+        $mem = $proc.WorkingSet64
+        $handles = $proc.Handles
+
+        Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Heartbeat" -Message "CPU: $cpu  WS(K): $([math]::Round($mem/1KB))  Handles: $handles"
+
+        # Detect idle state
+        if ($cpu -ne $lastCpu -or $mem -ne $lastMem -or $handles -ne $lastHandles)
+        {
+            # DISM is doing work
+            $lastChange = Get-Date
+        }
+        else
+        {
+            # DISM unchanged � check idle duration
+            $idleTime = (Get-Date) - $lastChange
+
+            if ($idleTime.TotalSeconds -ge $IdleThresholdSeconds)
+            {
+                Log -Level "WARN" -Category "DISMHeartbeat" -Operation "IdleWarning" -Message "DISM has been idle for $($idleTime.TotalMinutes.ToString('0.0')) minutes."
+            }
+        }
+
+        $lastCpu = $cpu
+        $lastMem = $mem
+        $lastHandles = $handles
+
+        Start-Sleep -Seconds $IntervalSeconds
+    }#end while block
+}#end function Start-DISMHeartbeat
+
+function Invoke-DISMWithDeadlockDetection
+{
+    param(
+        [string]$Arguments,
+        [int]$IdleThresholdSeconds = 600    # 10 minutes
+    )
+
+    Log -Level "INFO" -Category "DISM" -Operation "Start" -Message "Starting DISM with arguments: $Arguments"
+
+    $proc = Start-Process -FilePath "dism.exe" -ArgumentList $Arguments -PassThru -WindowStyle Hidden
+
+    $lastCpu     = $proc.CPU
+    $lastMem     = $proc.WorkingSet64
+    $lastHandles = $proc.Handles
+    $lastChange  = Get-Date
+
+    while (-not $proc.HasExited)
+    {
+        Start-Sleep -Seconds 30
+
+        try
+        {
+            $proc.Refresh()
+        }
+        catch
+        {
+            break
+        }
+
+        $cpu     = $proc.CPU
+        $mem     = $proc.WorkingSet64
+        $handles = $proc.Handles
+
+        Log -Level "INFO" -Category "DISM" -Operation "Heartbeat" -Message "CPU: $cpu  WS(K): $([math]::Round($mem/1KB))  Handles: $handles"
+
+        if ($cpu -ne $lastCpu -or $mem -ne $lastMem -or $handles -ne $lastHandles)
+        {
+            $lastChange = Get-Date
+        }
+        else
+        {
+            $idleTime = (Get-Date) - $lastChange
+
+            if ($idleTime.TotalSeconds -ge $IdleThresholdSeconds)
+            {
+                Log -Level "ERROR" -Category "DISM" -Operation "Deadlock" -Message "DISM idle for $($idleTime.TotalMinutes.ToString('0.0')) minutes. Killing process."
+
+                try
+                {
+                    $proc.Kill()
+                }
+                catch
+                {
+                    Log -Level "EXCEPTION" -Category "DISM" -Operation "KillFailed" -Message "Failed to kill DISM process." -ExceptionType $_.Exception.GetType().FullName
+                }
+
+                break
+            }
+        }
+
+        $lastCpu     = $cpu
+        $lastMem     = $mem
+        $lastHandles = $handles
+    }#end while block
+
+    if ($proc.HasExited)
+    {
+        Log -Level "INFO" -Category "DISM" -Operation "Exit" -Message "DISM exited with code $($proc.ExitCode)."
+        return $proc.ExitCode
+    }
+    else
+    {
+        Log -Level "WARN" -Category "DISM" -Operation "Abort" -Message "DISM monitoring loop ended without normal exit."
+        return -1
+    }
+}#end function Invoke-DISMWithDeadlockDetection
 
 # Base path where your SECTION scripts live
 $basePath = "D:\GitHub\PowerShellGoodies\Windows11Scripts"
@@ -128,65 +275,6 @@ function Show-FinalRuntimeSummary
     Write-Host "============================================================" -ForegroundColor Yellow
 }#end function Show-FinalRuntimeSummary
 
-
-# ============================================================
-# DISM HEARTBEAT MONITOR
-# ============================================================
-
-function Start-DISMHeartbeat
-{
-    param(
-        [int]$IntervalSeconds = 30,
-        [int]$IdleThresholdSeconds = 300   # 5 minutes
-    )
-
-    Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Start" -Message "DISM heartbeat monitor activated."
-
-    $lastCpu = 0
-    $lastMem = 0
-    $lastHandles = 0
-    $lastChange = Get-Date
-
-    while ($true)
-    {
-        $proc = Get-Process -Name dism -ErrorAction SilentlyContinue
-
-        if (-not $proc)
-        {
-            Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Stop" -Message "DISM process ended. Heartbeat monitor stopping."
-            break
-        }
-
-        $cpu = $proc.CPU
-        $mem = $proc.WorkingSet64
-        $handles = $proc.Handles
-
-        Log -Level "INFO" -Category "DISMHeartbeat" -Operation "Heartbeat" -Message "CPU: $cpu  WS(K): $([math]::Round($mem/1KB))  Handles: $handles"
-
-        # Detect idle state
-        if ($cpu -ne $lastCpu -or $mem -ne $lastMem -or $handles -ne $lastHandles)
-        {
-            # DISM is doing work
-            $lastChange = Get-Date
-        }
-        else
-        {
-            # DISM unchanged � check idle duration
-            $idleTime = (Get-Date) - $lastChange
-
-            if ($idleTime.TotalSeconds -ge $IdleThresholdSeconds)
-            {
-                Log -Level "WARN" -Category "DISMHeartbeat" -Operation "IdleWarning" -Message "DISM has been idle for $($idleTime.TotalMinutes.ToString('0.0')) minutes."
-            }
-        }
-
-        $lastCpu = $cpu
-        $lastMem = $mem
-        $lastHandles = $handles
-
-        Start-Sleep -Seconds $IntervalSeconds
-    }#end while block
-}#end function Start-DISMHeartbeat
 
 
 # ============================================================
