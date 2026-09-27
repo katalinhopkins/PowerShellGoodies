@@ -1,0 +1,1 @@
+﻿#Step 1 — Run SFC (repairs file-level corruption)
