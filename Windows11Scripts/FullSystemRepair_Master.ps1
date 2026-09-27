@@ -13,10 +13,12 @@
 
 # ============================================================
 
-# 1. Run the master script
-# .\FullSystemRepair_Master.ps1
-# 2. Execute the full repair
-# Invoke-FullSystemRepair
+<#
+ 1. Run the master script
+ .\FullSystemRepair_Master.ps1
+ 2. Execute the full repair
+ Invoke-FullSystemRepair
+#>
 
 # ============================================================
 
