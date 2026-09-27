@@ -8,6 +8,12 @@ reboots the PC
 fails with error 0x800f081f
 fails with error 0x800f0982
 fails with error 0x80073712
+
+When it finishes: REBOOT
 #>
 
 DISM /Online /Cleanup-Image /RestoreHealth
+
+Write-Host "RestoreHealth is COMPLETE..."
+Write-Host "REBOOTING NOW" -ForegroundColor Red
+Restart-Computer

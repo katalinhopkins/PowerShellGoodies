@@ -11,3 +11,7 @@ When it finishes: Reboot
 #>
 
 sfc /scannow
+
+Write-Host "scannow is Complete...." -ForegroundColor Cyan
+Write-Host "REBOOTING NOW" -ForegroundColor Red
+Restart-Computer
