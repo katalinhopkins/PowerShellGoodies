@@ -20,6 +20,8 @@
 
 # ============================================================
 
+cd D:\GitHub\PowerShellGoodies\Windows11Scripts
+
 # Base path where your SECTION scripts live
 $basePath = "D:\GitHub\PowerShellGoodies\Windows11Scripts"
 

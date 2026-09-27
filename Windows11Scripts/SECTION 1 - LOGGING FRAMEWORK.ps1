@@ -3,7 +3,7 @@
 # ============================================================
 
 # Create log directory
-$logRoot = "C:\ServiceReset_25H2_Logs"
+$logRoot = "D:\ServiceReset_25H2_Logs"
 
 if (-not (Test-Path $logRoot))
 {
