@@ -12,7 +12,13 @@ fails with error 0x80073712
 When it finishes: REBOOT
 #>
 Write-Host (Get-Date -Format "yyyy-MM-dd HH:mm:ss")  -ForegroundColor Yellow
-DISM /Online /Cleanup-Image /RestoreHealth
+#Write-Host "Starting DISM /Online /Cleanup-Image /RestoreHealth...." -ForegroundColor Green
+Write-Host "Starting DISM /Online /Cleanup-Image /RestoreHealth /LimitAccess /Source:WIM... " -ForegroundColor Cyan 
+#DISM /Online /Cleanup-Image /RestoreHealth
+
+#Run RestoreHealth without Windows Update
+DISM /Online /Cleanup-Image /RestoreHealth /LimitAccess /Source:WIM
+
 
 Write-Host "RestoreHealth is COMPLETE..."
 Write-Host (Get-Date -Format "yyyy-MM-dd HH:mm:ss")  -ForegroundColor Yellow

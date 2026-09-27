@@ -10,6 +10,9 @@ This step often “unsticks” DISM.
 When it finishes: Reboot
 #>
 Write-Host (Get-Date -Format "yyyy-MM-dd HH:mm:ss")  -ForegroundColor Yellow
+
+Write-Host "Starting scannow...." -ForegroundColor Green
+
 sfc /scannow
 
 Write-Host "scannow is Complete...." -ForegroundColor Cyan
