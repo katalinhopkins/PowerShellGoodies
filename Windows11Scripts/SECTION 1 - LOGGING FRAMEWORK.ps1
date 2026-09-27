@@ -96,6 +96,10 @@ function Log
 
     # Console output
     Write-Host "$Level :: $Category :: $Operation :: $Message" -ForegroundColor $color
+    Write-Host "Level: $Level" -ForegroundColor $color
+    Write-Host "Category: $Category" -ForegroundColor $color
+    Write-Host "Operation: $Operation" -ForegroundColor $color
+    Write-Host "Message: $Message" -ForegroundColor $color    
 
     # Human-readable log
     Write-HumanLog "$Level :: $Category :: $Operation :: $Message"

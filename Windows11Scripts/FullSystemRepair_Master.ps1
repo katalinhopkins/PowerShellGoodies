@@ -57,6 +57,76 @@ Write-Host "All subsystem modules loaded." -ForegroundColor Green
 
 
 # ============================================================
+# PROGRESS + STOPWATCH + SUMMARY ENGINE
+# ============================================================
+
+# Ordered list of subsystem names for progress tracking
+$Subsystems = @(
+    "Manifest Processing",
+    "Core Windows Service Reset",
+    "Duplicate Per-User Cleanup",
+    "Third-Party Service Removal",
+    "WMI Repository Repair",
+    "Windows Update Repair",
+    "Credential Provider Repair"
+)
+
+# Hashtable to store elapsed times
+$RuntimeSummary = @{}
+
+function Start-SubsystemTimer
+{
+    param([string]$Name)
+
+    $sw = [System.Diagnostics.Stopwatch]::StartNew()
+    $RuntimeSummary[$Name] = $sw
+}#end function Start-SubsystemTimer
+
+function Stop-SubsystemTimer
+{
+    param([string]$Name)
+
+    $RuntimeSummary[$Name].Stop()
+}#end function Stop-SubsystemTimer
+
+function Show-Progress
+{
+    param(
+        [int]$Index,
+        [string]$Name
+    )
+
+    $percent = [math]::Round(($Index / $Subsystems.Count) * 100)
+    $elapsed = $RuntimeSummary[$Name].Elapsed.ToString("hh\:mm\:ss")
+
+    Write-Host "[$percent%] $Name (Elapsed: $elapsed)" -ForegroundColor Cyan
+}#end function Show-Progress
+
+function Show-FinalRuntimeSummary
+{
+    Write-Host ""
+    Write-Host "============================================================" -ForegroundColor Yellow
+    Write-Host "FULL RUNTIME SUMMARY" -ForegroundColor Yellow
+    Write-Host "------------------------------------------------------------" -ForegroundColor Yellow
+
+    $total = [System.TimeSpan]::Zero
+
+    foreach ($key in $RuntimeSummary.Keys)
+    {
+        $elapsed = $RuntimeSummary[$key].Elapsed
+        $total += $elapsed
+
+        Write-Host ("{0,-35} {1}" -f $key, $elapsed.ToString("hh\:mm\:ss")) -ForegroundColor White
+    }
+
+    Write-Host "------------------------------------------------------------" -ForegroundColor Yellow
+    Write-Host ("TOTAL RUNTIME:{0,30}" -f $total.ToString("hh\:mm\:ss")) -ForegroundColor Green
+    Write-Host "============================================================" -ForegroundColor Yellow
+}#end function Show-FinalRuntimeSummary
+
+
+
+# ============================================================
 # Unified Execution Function
 # ============================================================
 
