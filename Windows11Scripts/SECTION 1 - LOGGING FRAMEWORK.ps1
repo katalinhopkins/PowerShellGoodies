@@ -115,6 +115,84 @@ function Log
         -ExceptionType $ExceptionType
 }#end function Log
 
+function Invoke-DISMWithDeadlockDetection
+{
+    param(
+        [string]$Arguments,
+        [int]$IdleThresholdSeconds = 600    # 10 minutes
+    )
+
+    Log -Level "INFO" -Category "DISM" -Operation "Start" -Message "Starting DISM with arguments: $Arguments"
+
+    $proc = Start-Process -FilePath "dism.exe" -ArgumentList $Arguments -PassThru -WindowStyle Hidden
+
+    $lastCpu     = $proc.CPU
+    $lastMem     = $proc.WorkingSet64
+    $lastHandles = $proc.Handles
+    $lastChange  = Get-Date
+
+    while (-not $proc.HasExited)
+    {
+        Start-Sleep -Seconds 30
+
+        try
+        {
+            $proc.Refresh()
+        }
+        catch
+        {
+            break
+        }
+
+        $cpu     = $proc.CPU
+        $mem     = $proc.WorkingSet64
+        $handles = $proc.Handles
+
+        Log -Level "INFO" -Category "DISM" -Operation "Heartbeat" -Message "CPU: $cpu  WS(K): $([math]::Round($mem/1KB))  Handles: $handles"
+
+        if ($cpu -ne $lastCpu -or $mem -ne $lastMem -or $handles -ne $lastHandles)
+        {
+            $lastChange = Get-Date
+        }
+        else
+        {
+            $idleTime = (Get-Date) - $lastChange
+
+            if ($idleTime.TotalSeconds -ge $IdleThresholdSeconds)
+            {
+                Log -Level "ERROR" -Category "DISM" -Operation "Deadlock" -Message "DISM idle for $($idleTime.TotalMinutes.ToString('0.0')) minutes. Killing process."
+
+                try
+                {
+                    $proc.Kill()
+                }
+                catch
+                {
+                    Log -Level "EXCEPTION" -Category "DISM" -Operation "KillFailed" -Message "Failed to kill DISM process." -ExceptionType $_.Exception.GetType().FullName
+                }
+
+                break
+            }
+        }
+
+        $lastCpu     = $cpu
+        $lastMem     = $mem
+        $lastHandles = $handles
+    }#end while block
+
+    if ($proc.HasExited)
+    {
+        Log -Level "INFO" -Category "DISM" -Operation "Exit" -Message "DISM exited with code $($proc.ExitCode)."
+        return $proc.ExitCode
+    }
+    else
+    {
+        Log -Level "WARN" -Category "DISM" -Operation "Abort" -Message "DISM monitoring loop ended without normal exit."
+        return -1
+    }
+}#end function Invoke-DISMWithDeadlockDetection
+
+
 # ------------------------------------------------------------
 # Section header
 # ------------------------------------------------------------
