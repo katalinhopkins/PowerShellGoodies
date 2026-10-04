@@ -1,5 +1,4 @@
 ﻿<#
-    EnahncedInstalledProgramsList
     Generates a CSV file containing:
         - Win32 installed programs (registry)
         - Windows Store apps (AppX)
@@ -9,9 +8,9 @@
         - Registry key path
         - AppX permissions
         - Normalized schema
+        - Console output for each item
 #>
 
-#$OutputFile = "$env:USERPROFILE\InstalledProgramsAndApps.csv"
 $OutputFile = "\\DS224\LGGram16\2026-10-04\InstalledProgramsAndApps.csv"
 
 Write-Host "Starting inventory collection..." -ForegroundColor Cyan
@@ -119,14 +118,30 @@ $storeApps = Get-AppxPackage | ForEach-Object {
 
 
 # -----------------------------
-# Combine + Export
+# Combine + Console Output + Export
 # -----------------------------
 Write-Host "Combining results..." -ForegroundColor Yellow
 
 $combined = $win32 + $storeApps
 
+Write-Host "Outputting each item to console..." -ForegroundColor Magenta
+foreach ($item in $combined)
+{
+    Write-Host "$($item.Type) - $($item.Name) - $($item.Version)" -ForegroundColor White
+} #end foreach console output
+
+
 Write-Host "Exporting to CSV: $OutputFile" -ForegroundColor Green
-$combined | Export-Csv -Path $OutputFile -NoTypeInformation -Encoding UTF8
+
+try
+{
+    $combined | Export-Csv -Path $OutputFile -NoTypeInformation -Encoding UTF8
+    Write-Host "Inventory exported successfully." -ForegroundColor Cyan
+}
+catch
+{
+    Write-Host "ERROR: Failed to write to network path $OutputFile" -ForegroundColor Red
+    Write-Host $_.Exception.Message -ForegroundColor Red
+}
 
 Write-Host "Inventory complete." -ForegroundColor Cyan
-

@@ -8,7 +8,9 @@
     Output file: InstalledProgramsAndApps.txt
 #>
 
-$OutputFile = "$env:USERPROFILE\InstalledProgramsAndApps.txt"
+#$OutputFile = "$env:USERPROFILE\InstalledProgramsAndApps.txt"
+$OutputFile = "\\DS224\LGGram16\2026-10-04\InstalledProgramsAndApps.txt"
+
 
 # Collect Win32 programs from registry
 $win32 = @()
