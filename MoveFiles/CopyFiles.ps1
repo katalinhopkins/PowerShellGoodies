@@ -79,7 +79,8 @@ $TableName = 'FilesTable'
 #$Source ="D:\Users\Katal\OneDrive\MS-Surface-E6F1US5\Videos"
 #$Source =""
 #$Source =""
-$Source ="D:\Users\Katal\Anastasia\iCloudDrive"
+$Source ="C:\Users\katal"
+#$Source ="D:\Users\Katal\Anastasia\iCloudDrive"
 #$Source ="C:\GitHub\PowerShellGoodies"
 
 <#
@@ -108,10 +109,11 @@ $Source="\\DS224\MS-Surface-E6F1US5\Documents"
 
 #$Destination = "D:\Users\Katal\OneDrive"
 #$Destination = "\\DS224\Documents"
-$Destination = "\\DS224\Anastasia"
+#$Destination = "\\DS224\Anastasia"
 
 #$Destination = "\\DS224\MS-Surface-E6F1US5"
-#$Destination = ""
+#$Destination = "\\DS224\LGGram16"
+$Destination = "\\DS224\LGGram16"
 #$Destination = ""
 #$Destination = ""
 #$Destination = ""
@@ -231,7 +233,7 @@ If(-not $CopyOnlyFLag)
 	$FileObjectList = GetFiles -Source $Source -Destination $Destination
 	#>
 
-	#
+	<#
 	#Create excel worksheet and table
 	$ExcelWorkSheet = CreateExcelTable `
 								-ExcelWorkBook $ExcelWorkBook `
@@ -241,7 +243,7 @@ If(-not $CopyOnlyFLag)
 								-ExcelFileName $ExcelFileName
 	#>
 
-	#
+	<#
 	#Populate the excel table with the file/folder information
 	$ExcelWorkSheet = PopulateExcelTable `
 						-ExcelWorkSheet $ExcelWorkSheet `

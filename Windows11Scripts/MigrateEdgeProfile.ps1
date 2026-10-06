@@ -42,7 +42,8 @@ param
 
     [Parameter(Mandatory = $false)]
     [string]
-    $TransferPath = "$env:USERPROFILE\EdgeProfileTransfer"  # Folder to store/export/import profile
+    #$TransferPath = "$env:USERPROFILE\EdgeProfileTransfer"  # Folder to store/export/import profile
+    $TransferPath = "\\DS224\LGGram16\2026-10-04\EdgeProfileTransfer"
 )
 
 #region Helper functions
