@@ -126,6 +126,18 @@ $Destination = "\\DS224\LGGram16"
 #$Destination = "D:\Users\Katal\OneDrive\Documents"
 #$Destination = "D:\Users\Katal\OneDrive\Documents\MyPets"
 
+$Source = "C:\Users\katal\AppData"
+$Source = "C:\Users\katal\.vscode"
+$Source = ""
+$Destination = ""
+
+$Source = ""
+$Destination = ""
+
+$Source = "C:\Users\katal\AppData\Local\Microsoft\Office"
+$Destination = "\\DS224\LG\AppData-Local\Microsoft"
+
+
 $ScriptLocation = Get-Location
 	$ScriptPath = $ScriptLocation.Path
 	$ScriptName = ""
@@ -288,14 +300,15 @@ RobocopyMoveFiles -Source $Source -Destination $Destination -LogFile $LogFile
 
 
 
-#
-$psCommand =  "`RobocopyCopyFiles `` `n`t" + 
-		"-Source `"" + $Source + "`" `` `n`t" + 
-		"-Destination `"" + $Destination + "`"" 
+#$Destination is the PARENT folder, so copy into $Destination\<SourceFolderName>
+#(robocopy copies the CONTENTS of $Source, so passing $Destination would dump them into the parent)
+$psCommand =  "`RobocopyCopyFiles `` `n`t" +
+		"-Source `"" + $Source + "`" `` `n`t" +
+		"-Destination `"" + $DestinationFolder + "`""
 
 Write-Host -ForegroundColor Cyan  "`n#[293]Calling:"
 Write-Host -ForegroundColor White $psCommand
-RobocopyCopyFiles -Source $Source -Destination $Destination -LogFile $LogFile
+RobocopyCopyFiles -Source $Source -Destination $DestinationFolder -LogFile $LogFile
 #>
 
 
