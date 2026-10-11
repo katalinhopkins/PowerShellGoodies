@@ -270,10 +270,10 @@ Function global:RobocopyMoveFiles
 		#/copy:DATSOU
 	#To copy all files and directories (EXCLUDING empty ones) from the source directory to the destination directory, use the following command:
 #/e = include empty subdirectories
-	robocopy $Source $Destination /S /COPY:DAT /DCOPY:DAT /MOVE /R:3 /W:3 /MT:16 /TEE /LOG:$LogFile
+	robocopy $Source $Destination /S /COPY:DAT /DCOPY:DAT /MOVE /R:3 /W:3 /MT:16 /TEE # /LOG:$LogFile
 	
 	#explorer $Destination
-	explorer $LogFile
+	#explorer $LogFile
 
 	$today = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 	Write-Host -ForegroundColor Magenta "`n`t *************[$today] FINISHED 4_RobocopyMoveFiles from $Source to $Destination *****************"

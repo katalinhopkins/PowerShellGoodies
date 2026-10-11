@@ -193,8 +193,10 @@ $TableName = 'FilesTable'
 
 #$Source="\\DS224\MS-Surface-E6F1US5\Chief Architect"
 #$Source="\\DS224\Documents\Personal"
-$Source = "\\DS224\Downloads\Executables"
+#$Source = "\\DS224\Downloads\Executables"
 
+#$Source = "D:\Users\Katal\OneDrive\OneNote NoteBooks"
+$Source = "C:\Users\katal\CrossDevice"
 
 #Destination = MAKE SURE THAT THE DESTINATION IS THE PARENT FOLDER WHERE THE FILES GET COPIED/MOVED!
 
@@ -205,12 +207,19 @@ $Source = "\\DS224\Downloads\Executables"
 
 #$Destination = "\\DS224\Chief Architect"
 #$Destination = "\\DS224\Documents"
-$Destination = "\\DS224\Downloads"
+#$Destination = "\\DS224\Downloads"
 #$Destination = "\\DS224\Music"
 #$Destination = "\\DS224\Video"
 #$Destination = "\\DS224\Photo"
 
+$Source = "C:\Users\katal\CrossDevice"
+#$Destination = "\\DS224\Photo"
 
+$Source = "C:\Users\katal\CrossDevice\Katalin's Note20 (1)"
+$Destination = "\\DS224\LGGram16"
+
+$Source = "C:\Users\katal\AppData"
+$Destination = "\\DS224\LGGram16"
 
 
 $CopyOnlyFLag = $true

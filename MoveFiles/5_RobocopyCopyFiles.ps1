@@ -209,8 +209,9 @@ Function global:RobocopyCopyFiles
 	Write-Host -ForegroundColor Magenta "`n *************[$today] START 5_RobocopyCopyFiles *****************"
 	
 	#get # of folders and files:
-	$FolderCount = (Get-ChildItem -Path $Source -Recurse -Directory | Measure-Object).Count
-	$FileCount = (Get-ChildItem -Path $Source -Recurse -File | Measure-Object).Count
+	#-Force so hidden/system items are counted too (robocopy copies them)
+	$FolderCount = (Get-ChildItem -Path $Source -Recurse -Directory -Force -ErrorAction SilentlyContinue | Measure-Object).Count
+	$FileCount = (Get-ChildItem -Path $Source -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object).Count
 	
 
 	$TodayFolder  = (Get-Date -Format 'MM-dd-yyyy-HH-mm-ss')
@@ -301,20 +302,41 @@ Function global:RobocopyCopyFiles
 		"`"" + $Destination + "`" `` `n`t" +
 		#"/E /ETA /COPYALL /DCOPY:DAT /R:3 /W:3 /MT:16 " +
 		#"/E /COPYALL /DCOPY:DAT /R:3 /W:3 /MT:16 " +
-		"/E /COPY:DAT /DCOPY:DAT /R:3 /W:3 /MT:16 " #+
-		#"/TEE /LOG:`` `n`t" +		
-		#"`"" + $LogFile + "`""    
+		"/E /COPY:DAT /DCOPY:DAT /XJD /R:3 /W:3 /MT:16 /TEE " +
+		"/UNILOG+:`"" + $LogFile + "`""
+	Write-Host -ForegroundColor White $psCommand
 
 	#$psCommand =  "`nrobocopy `"" + $Source + "`" `"" + $Destination + "`" /S /E /ETA /DCOPY:DAT /R:10 /W:3 /MT:16 /TEE /LOG:`"" +$LogFile +"`""
 
 
 	#exclude empty directories
 #robocopy $Source $Destination /S /ETA /COPYALL /DCOPY:DAT /R:3 /W:3 /MT:16 /LOG:$LogFile
-robocopy $Source $Destination /E /COPY:DAT /DCOPY:DAT /R:3 /W:3 /MT:16 /TEE # /LOG:$LogFile
+	#/E   = all subfolders, including empty ones
+	#/XJD = skip directory junctions (e.g. "Application Data" under the user profile) which otherwise loop or fail with Access Denied
+	$RobocopyArgs = @($Source, $Destination, '/E', '/COPY:DAT', '/DCOPY:DAT', '/XJD', '/R:3', '/W:3', '/MT:16', '/TEE')
+	If($LogFile) { $RobocopyArgs += "/UNILOG+:$LogFile" }
+	robocopy @RobocopyArgs
+	$RobocopyExitCode = $LASTEXITCODE
 
 #robocopy c:\temp\source c:\temp\destination /E /COPYALL /DCOPY:DAT /MOVE /R:100 /W:3
+
+	#Compare source vs destination counts, robocopy exit codes >= 8 mean some files/folders FAILED to copy
+	$DestFolderCount = (Get-ChildItem -Path $Destination -Recurse -Directory -Force -ErrorAction SilentlyContinue | Measure-Object).Count
+	$DestFileCount = (Get-ChildItem -Path $Destination -Recurse -File -Force -ErrorAction SilentlyContinue | Measure-Object).Count
+
+	Write-Host -ForegroundColor Yellow "`nSource:      Folders=$FolderCount Files=$FileCount"
+	Write-Host -ForegroundColor Yellow "Destination: Folders=$DestFolderCount Files=$DestFileCount"
+	If($RobocopyExitCode -ge 8)
+	{
+		Write-Host -ForegroundColor Red "robocopy exit code $RobocopyExitCode : some items FAILED to copy, search the log for 'ERROR'"
+	}
+	Else
+	{
+		Write-Host -ForegroundColor Green "robocopy exit code $RobocopyExitCode : no failures"
+	}
+
 	#explorer $Destination
-	explorer $LogFile
+	If($LogFile -and (Test-Path $LogFile)) { explorer $LogFile }
 
 	$today = Get-Date -Format 'yyyy-MM-dd HH:mm:ss'
 	Write-Host -ForegroundColor Magenta "`n *************[$today] FINISHED 5_RobocopyCopyFiles from $Source to $Destination *****************"
